@@ -1,0 +1,95 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:ReflectionWpf"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <local:MethodInfoToCommandConverter x:Key="Converter" ></local:MethodInfoToCommandConverter>
+    <DataTemplate x:Key="MethodTemplate">
+        <Border Background="GhostWhite" BorderBrush="ForestGreen"  BorderThickness="1" CornerRadius="3" Margin="3">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="{Binding Path=Name,Mode=OneTime}" Command="{Binding ExecuteCommand}" FontSize="12" />
+                <ContentPresenter Content="{Binding Value,Mode=OneWay}"></ContentPresenter>
+            </StackPanel>
+        </Border>
+    </DataTemplate>
+
+    <DataTemplate x:Key="PropertyTemplate">
+        <Border Background="GhostWhite" BorderBrush="DodgerBlue" BorderThickness="1" CornerRadius="3" Margin="3">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="{Binding Path=Name,Mode=OneTime}" FontSize="12" />
+                <ContentPresenter Content="{Binding Value,Mode=OneWay}"></ContentPresenter>
+            </StackPanel>
+        </Border>
+    </DataTemplate>
+
+    <DataTemplate x:Key="FieldTemplate">
+        <Border Background="GhostWhite" BorderBrush="IndianRed" BorderThickness="1" CornerRadius="3" Margin="3">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="{Binding Path=Name,Mode=OneTime}" FontSize="12" />
+                <ContentPresenter Content="{Binding Value,Mode=OneWay}"></ContentPresenter>
+            </StackPanel>
+        </Border>
+    </DataTemplate>
+
+    <local:ReflectionDataTemplateSelector x:Key="ReflectionDataTemplateSelector" 
+                                          MethodTemplate="{StaticResource MethodTemplate}"
+                                          PropertyTemplate="{StaticResource PropertyTemplate}"
+                                          FieldTemplate="{StaticResource FieldTemplate}"
+    />
+
+
+    <Style x:Key="ReflectionControlStyle"  TargetType="{x:Type  local:ReflectionControl }">
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:ReflectionControl }">
+                    <ItemsControl ItemsSource="{Binding Items,RelativeSource={RelativeSource TemplatedParent}}" 
+                                  ItemTemplateSelector="{StaticResource ReflectionDataTemplateSelector}">
+
+                    </ItemsControl>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+
+
+
+    <Style x:Key="ReflectionItemsControlStyle" TargetType="{x:Type local:ReflectionItemsControl}">
+        <Style.Resources>
+            <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}"
+                                x:Key="AlignmentValues">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="local:Reflection" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+        </Style.Resources>
+        <Setter Property="Template" >
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:ReflectionItemsControl}">
+                <ListView ItemsSource="{Binding Source={StaticResource AlignmentValues}}" >
+                    <ListView.View>
+                        <GridView>
+                            <GridView.ColumnHeaderContainerStyle>
+                                <Style>
+                                    <Setter Property="FrameworkElement.Visibility" Value="Collapsed"/>
+                                </Style>
+                            </GridView.ColumnHeaderContainerStyle>
+                            <GridViewColumn Header="Name" Width="120" DisplayMemberBinding="{Binding }" />
+                            <GridViewColumn Header="Value" Width="120">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                            <local:ReflectionControl Type="{Binding Class,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:ReflectionItemsControl}}}" Reflection="{Binding }"></local:ReflectionControl>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>
